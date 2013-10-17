@@ -241,7 +241,7 @@ public class GfarmFileSystem extends FileSystem {
             return new FileStatus(gfsImpl.getFileSize(srep),
                                   false,
                                   (int)gfsImpl.getReplication(srep),
-                                  getDefaultBlockSize(),
+                                  getDefaultBlockSize(path),
                                   gfsImpl.getModificationTime(srep),
                                   path.makeQualified(this));
         }
@@ -255,7 +255,7 @@ public class GfarmFileSystem extends FileSystem {
 	}
       
 	String srep = makeAbsolute(file.getPath()).toUri().getPath();
-	long blockSize = getDefaultBlockSize();
+	long blockSize = getDefaultBlockSize(file.getPath());
 	String[] hints = gfsImpl.getDataLocation(srep, start, len);
 
 	return new BlockLocation[] { new BlockLocation(null, hints, 0, len) };
