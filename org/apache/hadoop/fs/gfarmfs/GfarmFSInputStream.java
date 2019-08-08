@@ -13,7 +13,7 @@ class GfarmFSInputStream extends FSInputStream {
 
     public GfarmFSInputStream(GfarmFSNative gfsImpl, String path, FileSystem.Statistics stat) throws IOException {
         channel = new GfarmFSNativeInputChannel(path);
-        if(channel != null)
+        if (channel != null)
             fileSize = gfsImpl.getFileSize(path);
         statistics = stat;
     }
@@ -54,7 +54,7 @@ class GfarmFSInputStream extends FSInputStream {
         }
         return -1;
     }
-    
+
     public synchronized int read(byte b[], int off, int len) throws IOException {
         if (channel == null)
             throw new IOException("File closed");
@@ -79,9 +79,11 @@ class GfarmFSInputStream extends FSInputStream {
     public boolean markSupported() {
         return false;
     }
+
     public void mark(int readLimit) {
         // Do nothing
     }
+
     public void reset() throws IOException {
         throw new IOException("Mark not supported");
     }

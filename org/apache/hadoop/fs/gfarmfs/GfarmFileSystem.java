@@ -16,7 +16,6 @@ import org.apache.hadoop.fs.BlockLocation;
 
 /**
  * A FileSystem backed by Gfarm
- *
  */
 public class GfarmFileSystem extends FileSystem {
 
@@ -24,7 +23,7 @@ public class GfarmFileSystem extends FileSystem {
     private FileSystem localFs;
     private URI uri;
     private Path workingDir;
-   
+
     public GfarmFileSystem() {
     }
 
@@ -34,9 +33,9 @@ public class GfarmFileSystem extends FileSystem {
                 gfsImpl = new GfarmFSNative();
             this.localFs = FileSystem.getLocal(conf);
             this.uri = URI.create(uri.getScheme() + "://" + "null");
-	    String[] workingDirStr = getConf().getStrings("fs.gfarm.workingDir","/home/" + System.getProperty("user.name"));
-	    this.workingDir = 
-		new Path(workingDirStr[0]).makeQualified(this);
+            String[] workingDirStr = getConf().getStrings("fs.gfarm.workingDir", "/home/" + System.getProperty("user.name"));
+            this.workingDir =
+                    new Path(workingDirStr[0]).makeQualified(this);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Unable to initialize Gfarm file system");
@@ -45,23 +44,23 @@ public class GfarmFileSystem extends FileSystem {
     }
 
     public void checkPath(Path path) {
-	URI thisUri = this.getUri();
-	URI thatUri = path.toUri();
-	String thatAuthority = thatUri.getAuthority();
-	if (thatUri.getScheme() != null
-	    && thatUri.getScheme().equalsIgnoreCase(thisUri.getScheme()))
-	    return;
-	super.checkPath(path);
+        URI thisUri = this.getUri();
+        URI thatUri = path.toUri();
+        String thatAuthority = thatUri.getAuthority();
+        if (thatUri.getScheme() != null
+                && thatUri.getScheme().equalsIgnoreCase(thisUri.getScheme()))
+            return;
+        super.checkPath(path);
     }
 
     public Path makeQualified(Path path) {
-	URI thisUri = this.getUri();
-	URI thatUri = path.toUri();
+        URI thisUri = this.getUri();
+        URI thatUri = path.toUri();
         if (thatUri.getScheme() != null
-            && thatUri.getScheme().equalsIgnoreCase(thisUri.getScheme()))
-	    path = new Path(thisUri.getScheme(), null,
-			    thatUri.getPath());
-	return super.makeQualified(path);
+                && thatUri.getScheme().equalsIgnoreCase(thisUri.getScheme()))
+            path = new Path(thisUri.getScheme(), null,
+                    thatUri.getPath());
+        return super.makeQualified(path);
     }
 
     public URI getUri() {
@@ -74,16 +73,16 @@ public class GfarmFileSystem extends FileSystem {
         return new Path(workingDir, path);
     }
 
-    public void setWorkingDirectory(Path new_dir) {
-        workingDir = makeAbsolute(new_dir);
-    }
-    
     public Path getWorkingDirectory() {
         return workingDir;
     }
 
+    public void setWorkingDirectory(Path new_dir) {
+        workingDir = makeAbsolute(new_dir);
+    }
+
     public FSDataInputStream open(Path path, int bufferSize)
-        throws IOException {
+            throws IOException {
         if (!exists(path))
             throw new IOException("File does not exist: " + path);
 
@@ -101,7 +100,7 @@ public class GfarmFileSystem extends FileSystem {
                                      short replication,
                                      long blockSize,
                                      Progressable progress)
-        throws IOException {
+            throws IOException {
         if (exists(file)) {
             if (overwrite) {
                 delete(file);
@@ -121,8 +120,8 @@ public class GfarmFileSystem extends FileSystem {
     }
 
     public FSDataOutputStream append(Path f, int bufferSize,
-				     Progressable progress) throws IOException {
-	throw new IOException("Not supported");
+                                     Progressable progress) throws IOException {
+        throw new IOException("Not supported");
     }
 
     public boolean rename(Path src, Path dst) throws IOException {
@@ -153,7 +152,7 @@ public class GfarmFileSystem extends FileSystem {
         String srep = absolute.toUri().getPath();
         if (!exists(path))
             return false;
-        if (gfsImpl.isFile(srep)){
+        if (gfsImpl.isFile(srep)) {
             e = gfsImpl.remove(srep);
             if (e != 0)
                 throw new IOException(gfsImpl.getErrorString(e));
@@ -177,13 +176,13 @@ public class GfarmFileSystem extends FileSystem {
         Path absolute = makeAbsolute(path);
         String srep = absolute.toUri().getPath();
         if (gfsImpl.isFile(srep))
-            return new FileStatus[] { getFileStatus(path) } ;
-	String[] entries = null;
-	try {
-	    entries = gfsImpl.readdir(srep);
-	} catch ( Exception e) {
-	    return null;
-	}
+            return new FileStatus[]{getFileStatus(path)};
+        String[] entries = null;
+        try {
+            entries = gfsImpl.readdir(srep);
+        } catch (Exception e) {
+            return null;
+        }
 
         if (entries == null)
             return null;
@@ -210,12 +209,12 @@ public class GfarmFileSystem extends FileSystem {
     }
 
     public boolean mkdirs(Path path, FsPermission permission)
-        throws IOException {
+            throws IOException {
         Path absolute = makeAbsolute(path);
         String srep = absolute.toUri().getPath();
         // TODO: permission
         String[] dirs = srep.split("/");
-        if(dirs.length > 0){
+        if (dirs.length > 0) {
             String dir = "";
             for (int i = 0; i < dirs.length; i++) {
                 if (dirs[i].equals("")) continue;
@@ -236,29 +235,29 @@ public class GfarmFileSystem extends FileSystem {
         String srep = absolute.toUri().getPath();
         if (gfsImpl.isDirectory(srep)) {
             return new FileStatus(0, true, 1, 0, gfsImpl.getModificationTime(srep),
-                                  path.makeQualified(this));
+                    path.makeQualified(this));
         } else {
             return new FileStatus(gfsImpl.getFileSize(srep),
-                                  false,
-                                  (int)gfsImpl.getReplication(srep),
-                                  getDefaultBlockSize(path),
-                                  gfsImpl.getModificationTime(srep),
-                                  path.makeQualified(this));
+                    false,
+                    (int) gfsImpl.getReplication(srep),
+                    getDefaultBlockSize(path),
+                    gfsImpl.getModificationTime(srep),
+                    path.makeQualified(this));
         }
     }
 
     public BlockLocation[] getFileBlockLocations(FileStatus file, long start,
                                                  long len) throws IOException {
 
-	if(file == null) {
-	    return null;
-	}
-      
-	String srep = makeAbsolute(file.getPath()).toUri().getPath();
-	long blockSize = getDefaultBlockSize(file.getPath());
-	String[] hints = gfsImpl.getDataLocation(srep, start, len);
+        if (file == null) {
+            return null;
+        }
 
-	return new BlockLocation[] { new BlockLocation(null, hints, 0, len) };
+        String srep = makeAbsolute(file.getPath()).toUri().getPath();
+        long blockSize = getDefaultBlockSize(file.getPath());
+        String[] hints = gfsImpl.getDataLocation(srep, start, len);
+
+        return new BlockLocation[]{new BlockLocation(null, hints, 0, len)};
     }
 
 }
