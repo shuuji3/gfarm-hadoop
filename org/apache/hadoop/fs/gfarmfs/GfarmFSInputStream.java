@@ -7,12 +7,12 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FSInputStream;
 
 class GfarmFSInputStream extends FSInputStream {
-    private GfarmFSNativeInputChannel channel = null;
+    private GfarmFSReadChannel channel = null;
     private long fileSize = 0;
     private FileSystem.Statistics statistics = null;
 
     public GfarmFSInputStream(GfarmFSNative gfsImpl, String path, FileSystem.Statistics stat) throws IOException {
-        channel = new GfarmFSNativeInputChannel(path);
+        channel = new GfarmFSReadChannel(path);
         if(channel != null)
             fileSize = gfsImpl.getFileSize(path);
         statistics = stat;
@@ -54,7 +54,7 @@ class GfarmFSInputStream extends FSInputStream {
         }
         return -1;
     }
-    
+
     public synchronized int read(byte b[], int off, int len) throws IOException {
         if (channel == null)
             throw new IOException("File closed");

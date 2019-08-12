@@ -4,9 +4,9 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
-public class GfarmFSNativeInputChannel implements ReadableByteChannel {
+public class GfarmFSReadChannel implements ReadableByteChannel {
     private static final int DEFAULT_BUF_SIZE = 1 << 20;
-    private ByteBuffer readBuffer;
+    private ByteBuffer readByteBuffer;
     private long cPtr = 0; // for storing struct gfs_file
 
     private final static native long open(String path);
@@ -15,9 +15,9 @@ public class GfarmFSNativeInputChannel implements ReadableByteChannel {
     private final static native int seek(long cPtr, long offset);
     private final static native long tell(long cPtr);
 
-    public GfarmFSNativeInputChannel(String path) {
-        readBuffer = ByteBuffer.allocateDirect(DEFAULT_BUF_SIZE);
-        readBuffer.flip();
+    public GfarmFSReadChannel(String path) {
+        readByteBuffer = ByteBuffer.allocateDirect(DEFAULT_BUF_SIZE);
+        readByteBuffer.flip();
         cPtr = open(path);
     }
 
@@ -34,29 +34,29 @@ public class GfarmFSNativeInputChannel implements ReadableByteChannel {
         // While the dst buffer has space for more data, fill
         while(dst.hasRemaining()) {
             // Fill input buffer if it's empty
-            if(!readBuffer.hasRemaining()) {
-                readBuffer.clear();
-                readDirect(readBuffer);
-                readBuffer.flip();
+            if(!readByteBuffer.hasRemaining()) {
+                readByteBuffer.clear();
+                readDirect(readByteBuffer);
+                readByteBuffer.flip();
                 // If we failed to get anything, call that EOF
-                if(!readBuffer.hasRemaining())
+                if(!readByteBuffer.hasRemaining())
                     break;
             }
 
             // Save end of input buffer
-            int lim = readBuffer.limit();
-            
+            int lim = readByteBuffer.limit();
+
             // If dst buffer can't contain all of input buffer, limit
             // our copy size.
-            if(dst.remaining() < readBuffer.remaining())
-                readBuffer.limit(readBuffer.position() + dst.remaining());
-            
+            if(dst.remaining() < readByteBuffer.remaining())
+                readByteBuffer.limit(readByteBuffer.position() + dst.remaining());
+
             // Copy into dst buffer
-            dst.put(readBuffer);
+            dst.put(readByteBuffer);
 
             // Restore end of input buffer marker (maybe changed
             // earlier)
-            readBuffer.limit(lim);
+            readByteBuffer.limit(lim);
         }
 
         // If we copied anything into the dst buffer (or if there was
@@ -85,9 +85,9 @@ public class GfarmFSNativeInputChannel implements ReadableByteChannel {
     public int seek(long offset) throws IOException {
         if (cPtr == 0)
             throw new IOException("File closed");
-	
-	readBuffer.clear();
-	readBuffer.flip();
+
+	readByteBuffer.clear();
+	readByteBuffer.flip();
 
         return seek(cPtr, offset);
     }
@@ -95,7 +95,7 @@ public class GfarmFSNativeInputChannel implements ReadableByteChannel {
     public long tell() throws IOException {
         if (cPtr == 0)
             throw new IOException("File closed");
-        return tell(cPtr) - readBuffer.remaining();
+        return tell(cPtr) - readByteBuffer.remaining();
     }
 
     public void close() throws IOException {

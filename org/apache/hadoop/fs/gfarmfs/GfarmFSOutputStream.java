@@ -1,8 +1,6 @@
 package org.apache.hadoop.fs.gfarmfs;
 
 import java.io.*;
-import java.net.*;
-import java.util.*;
 import java.nio.ByteBuffer;
 
 import org.apache.hadoop.conf.Configuration;
@@ -11,10 +9,10 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.util.Progressable;
 
 class GfarmFSOutputStream extends OutputStream {
-    GfarmFSNativeOutputChannel channel = null;
+    GfarmFSWriteChannel channel = null;
 
     public GfarmFSOutputStream(String path) throws IOException {
-        channel = new GfarmFSNativeOutputChannel(path);
+        channel = new GfarmFSWriteChannel(path);
     }
 
     public long getPos() throws IOException {
@@ -42,7 +40,7 @@ class GfarmFSOutputStream extends OutputStream {
             throw new IOException("File closed");
         channel.flush();
     }
-    
+
     public void sync() throws IOException {
 	if (channel == null)
 	    throw new IOException("File closed");

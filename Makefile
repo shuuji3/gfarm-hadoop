@@ -8,8 +8,8 @@ JAVA_SOURCES = \
 	org/apache/hadoop/fs/gfarmfs/GfarmFSNativeInputChannel.java
 JNI_CLASSES = \
 	org.apache.hadoop.fs.gfarmfs.GfarmFSNative \
-	org.apache.hadoop.fs.gfarmfs.GfarmFSNativeOutputChannel \
-	org.apache.hadoop.fs.gfarmfs.GfarmFSNativeInputChannel
+	org.apache.hadoop.fs.gfarmfs.GfarmFSWriteChannel \
+	org.apache.hadoop.fs.gfarmfs.GfarmFSReadChannel
 
 # GCC
 CXXFLAGS = -Wall -O2 -g -D_REENTRANT -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux
