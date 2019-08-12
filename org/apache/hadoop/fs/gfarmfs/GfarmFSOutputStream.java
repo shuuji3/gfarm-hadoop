@@ -42,9 +42,9 @@ class GfarmFSOutputStream extends OutputStream {
     }
 
     public void sync() throws IOException {
-	if (channel == null)
-	    throw new IOException("File closed");
-	channel.sync();
+        if (channel == null)
+            throw new IOException("File closed");
+        channel.sync();
     }
 
     public synchronized void close() throws IOException {
